@@ -1,8 +1,8 @@
 use std::{fmt, ops};
 
-use adversary::search::Game;
+use adversary::search::{Game, WithCache};
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Symbol {
     X = 0,
     O = 1,
@@ -34,7 +34,7 @@ struct Place {
     y: usize,
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 struct TicTacToe {
     turn: Symbol,
     field: [[Option<Symbol>; 3]; 3],
@@ -128,6 +128,23 @@ fn tictactoe() {
         turn: Symbol::O,
         field: [[None; 3]; 3],
     };
+
+    for _ in 0..9 {
+        let m = game.find_best().unwrap();
+        game.perform(&m);
+        println!("{}", game);
+    }
+
+    assert!(game.get_moves().is_empty());
+    assert_eq!(game.evaluate(), [0, 0]);
+}
+
+#[test]
+fn cached_tictactoe() {
+    let mut game = TicTacToe {
+        turn: Symbol::O,
+        field: [[None; 3]; 3],
+    }.with_cache(20000);
 
     for _ in 0..9 {
         let m = game.find_best().unwrap();
