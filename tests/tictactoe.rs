@@ -1,6 +1,6 @@
 use std::{fmt, ops};
 
-use adversary::Game;
+use adversary::search::Game;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 enum Symbol {
@@ -43,7 +43,7 @@ struct TicTacToe {
 impl Game<2> for TicTacToe {
     type Move = Place;
 
-    const DEPTH: u32 = 10;
+    const DEPTH: u32 = 9;
 
     fn turn(&self) -> usize {
         self.turn as usize
@@ -109,15 +109,15 @@ impl Game<2> for TicTacToe {
 impl fmt::Display for TicTacToe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, " {} | {} | {} \n---+---+---\n {} | {} | {} \n---+---+---\n {} | {} | {} ",
-                self.field[0][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[1][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[2][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[0][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[1][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[2][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[0][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[1][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
-                self.field[2][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[0][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[1][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[2][0].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[0][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[1][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[2][1].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[0][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[1][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
+                 self.field[2][2].map(|s| format!("{}", s)).unwrap_or(" ".to_owned()),
         )
     }
 }

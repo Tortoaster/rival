@@ -4,9 +4,9 @@ extern crate test;
 use std::{fmt, ops};
 use test::Bencher;
 
-use adversary::Game;
+use adversary::search::{Game, WithCache};
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Symbol {
     X = 0,
     O = 1,
@@ -38,7 +38,7 @@ struct Place {
     y: usize,
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 struct TicTacToe {
     turn: Symbol,
     field: [[Option<Symbol>; 3]; 3],
@@ -47,7 +47,7 @@ struct TicTacToe {
 impl Game<2> for TicTacToe {
     type Move = Place;
 
-    const DEPTH: u32 = 10;
+    const DEPTH: u32 = 9;
 
     fn turn(&self) -> usize {
         self.turn as usize
@@ -137,6 +137,21 @@ fn tictactoe(bencher: &mut Bencher) {
             turn: Symbol::O,
             field: [[None; 3]; 3],
         };
+
+        for _ in 0..9 {
+            let m = game.find_best().unwrap();
+            game.perform(&m);
+        }
+    });
+}
+
+#[bench]
+fn cached_tictactoe(bencher: &mut Bencher) {
+    bencher.iter(|| {
+        let mut game = TicTacToe {
+            turn: Symbol::O,
+            field: [[None; 3]; 3],
+        }.with_cache(20000);
 
         for _ in 0..9 {
             let m = game.find_best().unwrap();
