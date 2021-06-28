@@ -12,17 +12,16 @@ pub struct Cached<G: Game<N>, const N: usize> {
     cache: HashMap<G, SearchResult<G::Move, N>>,
 }
 
-impl<G: Game<N>, const N: usize> Deref for Cached<G, N> {
-    type Target = G;
-
-    fn deref(&self) -> &Self::Target {
-        &self.game
-    }
+pub trait WithCache<const N: usize>: Game<N> + Sized {
+    fn with_cache(self, size: usize) -> Cached<Self, N>;
 }
 
-impl<G: Game<N>, const N: usize> DerefMut for Cached<G, N> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.game
+impl<G: Game<N> + Clone + Eq + Hash, const N: usize> WithCache<N> for G where G::Move: Clone {
+    fn with_cache(self, size: usize) -> Cached<Self, N> {
+        Cached {
+            game: self,
+            cache: HashMap::with_capacity(size),
+        }
     }
 }
 
@@ -100,21 +99,22 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
     }
 }
 
-impl<G: Game<N> + Display, const N: usize> fmt::Display for Cached<G, N> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.game)
+impl<G: Game<N>, const N: usize> Deref for Cached<G, N> {
+    type Target = G;
+
+    fn deref(&self) -> &Self::Target {
+        &self.game
     }
 }
 
-pub trait WithCache<const N: usize>: Game<N> + Sized {
-    fn with_cache(self, size: usize) -> Cached<Self, N>;
+impl<G: Game<N>, const N: usize> DerefMut for Cached<G, N> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.game
+    }
 }
 
-impl<G: Game<N> + Clone + Eq + Hash, const N: usize> WithCache<N> for G {
-    fn with_cache(self, size: usize) -> Cached<Self, N> {
-        Cached {
-            game: self,
-            cache: HashMap::with_capacity(size),
-        }
+impl<G: Game<N> + Display, const N: usize> fmt::Display for Cached<G, N> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.game)
     }
 }
