@@ -33,6 +33,29 @@ pub trait WithCache<const N: usize>: Game<N> + Sized {
     ///
     /// This can improve performance by reusing evaluations of game positions that have already been
     /// searched.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rival::games::TicTacToe;
+    /// # use rival::cache::WithCache;
+    /// # use rival::game::Game;
+    /// #
+    /// # fn test() -> Option<()> {
+    /// let mut game = TicTacToe::new()
+    ///     .with_cache(20000);
+    ///
+    /// // Takes a while to compute
+    /// let first = game.best_move()?;
+    /// game.perform(&first);
+    ///
+    /// // Computes quickly
+    /// let second = game.best_move()?;
+    /// game.perform(&second);
+    /// #
+    /// # None
+    /// # }
+    /// ```
     fn with_cache(self, size: usize) -> Cached<Self, N>;
 }
 

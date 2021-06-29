@@ -39,6 +39,29 @@ pub trait Game<const N: usize> {
     /// Returns the best [`Game::Move`] for the current player (see [`Game::turn`]), according to
     /// the calculated [`Game::value`] within the next [`Game::DEPTH`] moves, or [`None`] if the
     /// current player cannot perform any move.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rival::games::TicTacToe;
+    /// # use rival::cache::WithCache;
+    /// # use rival::game::Game;
+    /// #
+    /// # fn test() -> Option<()> {
+    /// let mut game = TicTacToe::new();
+    ///
+    /// // Play the entire game
+    /// while !game.moves().is_empty() {
+    ///     let m = game.best_move()?;
+    ///     game.perform(&m);
+    /// }
+    ///
+    /// // Neither of the players won
+    /// assert_eq!(game.value(), [0, 0]);
+    /// #
+    /// # None
+    /// # }
+    /// ```
     fn best_move(&mut self) -> Option<Self::Move> {
         self.max_n(Self::DEPTH, &mut [Value::MIN; N]).best
     }
