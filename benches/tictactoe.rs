@@ -4,7 +4,8 @@ extern crate test;
 use std::{fmt, ops};
 use test::Bencher;
 
-use adversary::search::{Game, WithCache};
+use adversary::cache::WithCache;
+use adversary::game::Game;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Symbol {

@@ -4,7 +4,8 @@ use std::fmt::Display;
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 
-use crate::search::{Game, SearchResult, Search, Value};
+use crate::game::Game;
+use crate::search::{Search, SearchResult, Value};
 
 #[derive(Clone, Debug)]
 pub struct Cached<G: Game<N>, const N: usize> {

@@ -1,9 +1,7 @@
-pub use cached_game::{Cached, WithCache};
-pub use game::Game;
 use std::hash::Hash;
 
-mod cached_game;
-mod game;
+use crate::cache::Cached;
+use crate::game::Game;
 
 pub(crate) type Value = i32;
 
