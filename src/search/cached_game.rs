@@ -12,7 +12,14 @@ pub struct Cached<G: Game<N>, const N: usize> {
     cache: HashMap<G, SearchResult<G::Move, N>>,
 }
 
+/// This trait provides the [`WithCache::with_cache`] method, which is implemented for all types
+/// that implement [`Game`] and satisfy the trait bounds necessary to store intermediate results in
+/// cache.
 pub trait WithCache<const N: usize>: Game<N> + Sized {
+    /// Enables this game to use a cache with the specified [`size`].
+    ///
+    /// This can improve performance by storing evaluations of game positions that have already been
+    /// searched.
     fn with_cache(self, size: usize) -> Cached<Self, N>;
 }
 
@@ -46,13 +53,13 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
     }
 
     #[inline]
-    fn perform(&mut self, action: &Self::Move) {
-        self.game.perform(action)
+    fn perform(&mut self, m: &Self::Move) {
+        self.game.perform(m)
     }
 
     #[inline]
-    fn undo(&mut self, action: &Self::Move) {
-        self.game.undo(action)
+    fn undo(&mut self, m: &Self::Move) {
+        self.game.undo(m)
     }
 
     fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {
