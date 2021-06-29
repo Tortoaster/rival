@@ -1,4 +1,4 @@
-use crate::search::{SearchResult, Value};
+use crate::search::{Search, Value};
 
 /// This trait can be implemented on any type that represents the state of a game. Doing so requires
 /// implementations that inform the trait of which moves each player can [`Game::perform`] and how
@@ -39,42 +39,6 @@ pub trait Game<const N: usize> {
     /// current player cannot perform any move.
     fn best_move(&mut self) -> Option<Self::Move> {
         self.max_n(Self::DEPTH, &mut [Value::MIN; N]).best
-    }
-
-    #[doc(hidden)]
-    fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {
-        let moves = self.moves();
-        let turn = self.turn();
-
-        if (depth <= 0 && self.quiet()) || moves.is_empty() {
-            SearchResult {
-                depth: 0,
-                value: self.value(),
-                best: None,
-            }
-        } else {
-            let mut best = SearchResult {
-                depth: 0,
-                value: [Value::MIN; N],
-                best: None,
-            };
-
-            for m in moves {
-                self.perform(&m);
-                let current = self.max_n(depth - 1, scores);
-                self.revert(&m);
-
-                if current.value[turn] > best.value[turn] {
-                    best = SearchResult {
-                        depth: current.depth + 1,
-                        value: current.value,
-                        best: Some(m),
-                    };
-                }
-            }
-
-            best
-        }
     }
 
     /// Indicates whether the current evaluation of the game state will not change much within
