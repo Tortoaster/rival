@@ -1,7 +1,7 @@
 use std::{fmt, ops};
 
-use adversary::cache::WithCache;
-use adversary::game::Game;
+use rival::cache::WithCache;
+use rival::game::Game;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Symbol {
