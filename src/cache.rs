@@ -1,3 +1,6 @@
+//! This module contains everything related to games that cache intermediate search results to
+//! improve performance.
+
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
@@ -24,7 +27,7 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Cached<G, N> where G::Move:
 
 /// This trait provides the [`WithCache::with_cache`] method, which is implemented for all types
 /// that implement [`Game`] and satisfy the trait bounds necessary to store intermediate results in
-/// cache.
+/// cache: [`Clone`], [`Eq`], and [`Hash`].
 pub trait WithCache<const N: usize>: Game<N> + Sized {
     /// Enables this game to use a cache with the specified size.
     ///

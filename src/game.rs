@@ -1,3 +1,5 @@
+//! This module holds the [`Game`] trait.
+
 use crate::search::{Search, Value};
 
 /// This trait can be implemented on any type that represents the state of a game. Doing so requires
