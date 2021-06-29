@@ -49,7 +49,7 @@ impl Game<2> for TicTacToe {
         self.turn as usize
     }
 
-    fn evaluate(&self) -> [i32; 2] {
+    fn value(&self) -> [i32; 2] {
         let triplets = vec![
             ((0, 0), (0, 1), (0, 2)),
             ((1, 0), (1, 1), (1, 2)),
@@ -77,8 +77,8 @@ impl Game<2> for TicTacToe {
         }
     }
 
-    fn get_moves(&self) -> Vec<Place> {
-        if self.evaluate()[0] != 0 {
+    fn moves(&self) -> Vec<Place> {
+        if self.value()[0] != 0 {
             Vec::new()
         } else {
             self.field
@@ -130,13 +130,13 @@ fn tictactoe() {
     };
 
     for _ in 0..9 {
-        let m = game.find_best().unwrap();
+        let m = game.best_move().unwrap();
         game.perform(&m);
         println!("{}", game);
     }
 
-    assert!(game.get_moves().is_empty());
-    assert_eq!(game.evaluate(), [0, 0]);
+    assert!(game.moves().is_empty());
+    assert_eq!(game.value(), [0, 0]);
 }
 
 #[test]
@@ -147,11 +147,11 @@ fn cached_tictactoe() {
     }.with_cache(20000);
 
     for _ in 0..9 {
-        let m = game.find_best().unwrap();
+        let m = game.best_move().unwrap();
         game.perform(&m);
         println!("{}", game);
     }
 
-    assert!(game.get_moves().is_empty());
-    assert_eq!(game.evaluate(), [0, 0]);
+    assert!(game.moves().is_empty());
+    assert_eq!(game.value(), [0, 0]);
 }

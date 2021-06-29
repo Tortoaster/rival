@@ -36,13 +36,13 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
     }
 
     #[inline]
-    fn evaluate(&self) -> [i32; N] {
-        self.game.evaluate()
+    fn value(&self) -> [i32; N] {
+        self.game.value()
     }
 
     #[inline]
-    fn get_moves(&self) -> Vec<Self::Move> {
-        self.game.get_moves()
+    fn moves(&self) -> Vec<Self::Move> {
+        self.game.moves()
     }
 
     #[inline]
@@ -62,13 +62,13 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
             }
         }
 
-        let moves = self.get_moves();
+        let moves = self.moves();
         let turn = self.turn();
 
-        if (depth <= 0 && self.is_quiet()) || moves.is_empty() {
+        if (depth <= 0 && self.quiet()) || moves.is_empty() {
             SearchResult {
                 depth: 0,
-                value: self.evaluate(),
+                value: self.value(),
                 best: None,
             }
         } else {

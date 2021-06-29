@@ -7,30 +7,26 @@ pub trait Game<const N: usize> {
 
     fn turn(&self) -> usize;
 
-    fn evaluate(&self) -> [Value; N];
+    fn value(&self) -> [Value; N];
 
-    fn get_moves(&self) -> Vec<Self::Move>;
+    fn moves(&self) -> Vec<Self::Move>;
 
     fn perform(&mut self, action: &Self::Move);
 
     fn undo(&mut self, action: &Self::Move);
 
-    fn is_quiet(&self) -> bool {
-        true
-    }
-
-    fn find_best(&mut self) -> Option<Self::Move> {
+    fn best_move(&mut self) -> Option<Self::Move> {
         self.max_n(Self::DEPTH, &mut [Value::MIN; N]).best
     }
 
     fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {
-        let moves = self.get_moves();
+        let moves = self.moves();
         let turn = self.turn();
 
-        if (depth <= 0 && self.is_quiet()) || moves.is_empty() {
+        if (depth <= 0 && self.quiet()) || moves.is_empty() {
             SearchResult {
                 depth: 0,
-                value: self.evaluate(),
+                value: self.value(),
                 best: None,
             }
         } else {
@@ -56,5 +52,9 @@ pub trait Game<const N: usize> {
 
             best
         }
+    }
+
+    fn quiet(&self) -> bool {
+        true
     }
 }
