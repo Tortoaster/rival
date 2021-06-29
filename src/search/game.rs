@@ -32,7 +32,7 @@ pub trait Game<const N: usize> {
 
     /// Reverts the given [`Game::Move`]. This is the dual of [`Game::perform`]: [`Game::revert`]
     /// after [`Game::perform`] with identical moves should have no effect on game's state.
-    fn undo(&mut self, m: &Self::Move);
+    fn revert(&mut self, m: &Self::Move);
 
     /// Returns the best [`Game::Move`] for the current player (see [`Game::turn`]), according to
     /// the calculated [`Game::value`] within the next [`Game::DEPTH`] moves, or [`None`] if the
@@ -62,7 +62,7 @@ pub trait Game<const N: usize> {
             for m in moves {
                 self.perform(&m);
                 let current = self.max_n(depth - 1, scores);
-                self.undo(&m);
+                self.revert(&m);
 
                 if current.value[turn] > best.value[turn] {
                     best = SearchResult {

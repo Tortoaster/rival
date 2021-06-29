@@ -58,8 +58,8 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
     }
 
     #[inline]
-    fn undo(&mut self, m: &Self::Move) {
-        self.game.undo(m)
+    fn revert(&mut self, m: &Self::Move) {
+        self.game.revert(m)
     }
 
     fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {
@@ -88,7 +88,7 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Game<N> for Cached<G, N> wh
             for m in moves {
                 self.perform(&m);
                 let current = self.max_n(depth - 1, scores);
-                self.undo(&m);
+                self.revert(&m);
 
                 if current.value[turn] > best.value[turn] {
                     best = SearchResult {

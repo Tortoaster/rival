@@ -100,7 +100,7 @@ impl Game<2> for TicTacToe {
         self.turn = !self.turn;
     }
 
-    fn undo(&mut self, action: &Place) {
+    fn revert(&mut self, action: &Place) {
         self.turn = !self.turn;
         self.field[action.x][action.y].take().expect("There is no symbol here");
     }
