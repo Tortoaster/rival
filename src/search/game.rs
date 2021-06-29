@@ -19,6 +19,7 @@ pub trait Game<const N: usize> {
         self.max_n(Self::DEPTH, &mut [Value::MIN; N]).best
     }
 
+    #[doc(hidden)]
     fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {
         let moves = self.moves();
         let turn = self.turn();
