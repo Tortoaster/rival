@@ -7,6 +7,8 @@ use std::ops::{Deref, DerefMut};
 use crate::game::Game;
 use crate::search::{Search, SearchResult, Value};
 
+/// This struct keeps track of a cache for a [`Game`], which allows it to store intermediate search
+/// results. It can be created with the [`WithCache::with_cache`] method.
 #[derive(Clone, Debug)]
 pub struct Cached<G: Game<N>, const N: usize> {
     pub(crate) game: G,
@@ -24,9 +26,9 @@ impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Cached<G, N> where G::Move:
 /// that implement [`Game`] and satisfy the trait bounds necessary to store intermediate results in
 /// cache.
 pub trait WithCache<const N: usize>: Game<N> + Sized {
-    /// Enables this game to use a cache with the specified [`size`].
+    /// Enables this game to use a cache with the specified size.
     ///
-    /// This can improve performance by storing evaluations of game positions that have already been
+    /// This can improve performance by reusing evaluations of game positions that have already been
     /// searched.
     fn with_cache(self, size: usize) -> Cached<Self, N>;
 }
