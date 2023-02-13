@@ -18,7 +18,10 @@ pub struct Cached<G: Game<N>, const N: usize> {
     pub(crate) cache: HashMap<G, SearchResult<G::Move, N>>,
 }
 
-impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Cached<G, N> where G::Move: Clone {
+impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Cached<G, N>
+where
+    G::Move: Clone,
+{
     #[doc(hidden)]
     pub fn best_move(&mut self) -> Option<G::Move> {
         self.max_n(G::DEPTH, &mut [Value::MIN; N]).best
@@ -33,33 +36,13 @@ pub trait WithCache<const N: usize>: Game<N> + Sized {
     ///
     /// This can improve performance by reusing evaluations of game positions that have already been
     /// searched.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rival::games::TicTacToe;
-    /// # use rival::cache::WithCache;
-    /// # use rival::game::Game;
-    /// #
-    /// # fn test() -> Option<()> {
-    /// let mut game = TicTacToe::new()
-    ///     .with_cache(20000);
-    ///
-    /// // Takes a while to compute
-    /// let first = game.best_move()?;
-    /// game.perform(&first);
-    ///
-    /// // Computes quickly
-    /// let second = game.best_move()?;
-    /// game.perform(&second);
-    /// #
-    /// # None
-    /// # }
-    /// ```
     fn with_cache(self, size: usize) -> Cached<Self, N>;
 }
 
-impl<G: Game<N> + Clone + Eq + Hash, const N: usize> WithCache<N> for G where G::Move: Clone {
+impl<G: Game<N> + Clone + Eq + Hash, const N: usize> WithCache<N> for G
+where
+    G::Move: Clone,
+{
     fn with_cache(self, size: usize) -> Cached<Self, N> {
         Cached {
             game: self,

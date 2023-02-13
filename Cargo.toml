@@ -12,5 +12,11 @@ categories = ["game-development"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[[example]]
+name = "tictactoe"
+crate-type = ["rlib"]
+test = true
+bench = true
+
+[dev-dependencies]
 version-sync = "0.9.2"

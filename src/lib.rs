@@ -5,5 +5,9 @@
 
 pub mod cache;
 pub mod game;
-pub mod games;
 mod search;
+
+// Definitions used in doctests, not public API
+// TODO: Add #[cfg(doctest)] when https://github.com/rust-lang/rust/issues/67295 is fixed
+#[doc(hidden)]
+pub mod docs;
