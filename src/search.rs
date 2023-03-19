@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
-use crate::cache::Cached;
-use crate::game::Game;
+use crate::{cache::Cached, game::Game};
 
 pub(crate) type Value = i32;
 
@@ -57,7 +56,10 @@ impl<G: ?Sized + Game<N>, const N: usize> Search<N> for G {
     }
 }
 
-impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Search<N> for Cached<G, N> where G::Move: Clone {
+impl<G: Game<N> + Clone + Eq + Hash, const N: usize> Search<N> for Cached<G, N>
+where
+    G::Move: Clone,
+{
     type Move = G::Move;
 
     fn max_n(&mut self, depth: u32, scores: &mut [Value; N]) -> SearchResult<Self::Move, N> {

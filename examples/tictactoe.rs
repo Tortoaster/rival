@@ -89,7 +89,7 @@ impl Game<2> for TicTacToe {
                     let symbols = self.symbol & *triplet;
                     if symbols == 0 {
                         Some([1, -1])
-                    } else if symbols == 0xFFFF & *triplet {
+                    } else if symbols == 0xffff & *triplet {
                         Some([-1, 1])
                     } else {
                         None
@@ -126,10 +126,8 @@ impl Game<2> for TicTacToe {
 mod tests {
     extern crate test;
 
+    use rival::{cache::WithCache, game::Game};
     use test::Bencher;
-
-    use rival::cache::WithCache;
-    use rival::game::Game;
 
     use crate::TicTacToe;
 
