@@ -1,4 +1,4 @@
-use std::{fmt, ops};
+use std::ops;
 
 use crate::game::Game;
 
@@ -114,50 +114,5 @@ impl Game<2> for TicTacToe {
         self.field[action.x][action.y]
             .take()
             .expect("There is no symbol here");
-    }
-}
-
-impl fmt::Display for Symbol {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Symbol::X => write!(f, "X"),
-            Symbol::O => write!(f, "O"),
-        }
-    }
-}
-
-impl fmt::Display for TicTacToe {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
-            f,
-            " {} | {} | {} \n---+---+---\n {} | {} | {} \n---+---+---\n {} | {} | {} ",
-            self.field[0][0]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[1][0]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[2][0]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[0][1]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[1][1]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[2][1]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[0][2]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[1][2]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-            self.field[2][2]
-                .map(|s| format!("{}", s))
-                .unwrap_or(" ".to_owned()),
-        )
     }
 }
