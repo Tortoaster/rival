@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use rival::game::Game;
+use rival::{Evaluate, Moves, SimplePerform, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToe {
@@ -58,30 +58,17 @@ impl TicTacToe {
     }
 
     #[inline]
-    fn unplace_unchecked(&mut self, m: u16) {
-        self.present ^= m;
-        if self.turn() == 0 {
-            self.symbol ^= m;
-        }
-        self.switch_turn();
-    }
-
-    #[inline]
     const fn valid_moves(&self) -> u16 {
         !self.present & 0b1111111110000000
     }
 }
 
-impl Game<2> for TicTacToe {
-    type Move = u16;
-
-    const DEPTH: u32 = 9;
-
+impl Evaluate<2> for TicTacToe {
     fn turn(&self) -> usize {
         self.turn() as usize
     }
 
-    fn value(&self) -> [i32; 2] {
+    fn evaluate(&self) -> [Value; 2] {
         TicTacToe::TRIPLETS
             .iter()
             .find_map(|triplet| {
@@ -100,25 +87,30 @@ impl Game<2> for TicTacToe {
             })
             .unwrap_or([0, 0])
     }
+}
 
-    fn moves(&self) -> Vec<Self::Move> {
+impl Moves for TicTacToe {
+    type Move = u16;
+    type Iter = <Vec<Self::Move> as IntoIterator>::IntoIter;
+
+    fn moves(&self) -> Self::Iter {
         let mut turns = Vec::new();
         let valid = self.valid_moves();
+
         for index in 0u16..9 {
             let turn = 1u16 << (15 - index);
             if turn & valid != 0 {
                 turns.push(turn);
             }
         }
-        turns
-    }
 
-    fn perform(&mut self, action: &Self::Move) {
-        self.place_unchecked(*action)
+        turns.into_iter()
     }
+}
 
-    fn revert(&mut self, action: &Self::Move) {
-        self.unplace_unchecked(*action)
+impl SimplePerform for TicTacToe {
+    fn perform(&mut self, m: &Self::Move) {
+        self.place_unchecked(*m);
     }
 }
 
@@ -126,7 +118,7 @@ impl Game<2> for TicTacToe {
 mod tests {
     extern crate test;
 
-    use rival::{cache::WithCache, game::Game};
+    use rival::{Evaluate, Moves, Perform, SearchExt};
     use test::Bencher;
 
     use crate::TicTacToe;
@@ -136,12 +128,12 @@ mod tests {
         let mut game = TicTacToe::new();
 
         for _ in 0..9 {
-            let m = game.best_move().unwrap();
+            let m = game.best_move(6).unwrap();
             game.perform(&m);
         }
 
-        assert!(game.moves().is_empty());
-        assert_eq!(game.value(), [0, 0]);
+        assert_eq!(game.moves().len(), 0);
+        assert_eq!(game.evaluate(), [0, 0]);
     }
 
     #[bench]
@@ -150,19 +142,7 @@ mod tests {
             let mut game = TicTacToe::new();
 
             for _ in 0..9 {
-                let m = game.best_move().unwrap();
-                game.perform(&m);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_tictactoe_cached(bencher: &mut Bencher) {
-        bencher.iter(|| {
-            let mut game = TicTacToe::new().with_cache(20000);
-
-            for _ in 0..9 {
-                let m = game.best_move().unwrap();
+                let m = game.best_move(6).unwrap();
                 game.perform(&m);
             }
         });
