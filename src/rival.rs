@@ -10,10 +10,12 @@ pub struct Rival<G, S, const N: usize> {
 
 impl<G: Moves, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
     pub fn get_best(&mut self, game: &mut G, depth: u8) -> RivalResult<G::Move> {
-        self.strategy
-            .search(game, depth, &mut [Value::MIN; N])
-            .best
-            .ok_or(RivalError::NoMove)
+        unsafe {
+            self.strategy
+                .search(game, depth, &mut [Value::MIN; N])
+                .best
+                .ok_or(RivalError::NoMove)
+        }
     }
 }
 

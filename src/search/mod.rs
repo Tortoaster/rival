@@ -5,9 +5,9 @@ mod max_n;
 pub use max_n::MaxN;
 
 pub trait Strategy<G: Moves, const N: usize> {
-    fn search(
+    unsafe fn search(
         &mut self,
-        game: &mut G,
+        game_ptr: *mut G,
         depth: u8,
         scores: &mut [Value; N],
     ) -> SearchResult<G::Move, N>;

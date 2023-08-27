@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use rival::{Evaluate, Moves, PerformWithClone, Value};
+use rival::{Evaluate, Moves, PlayClone, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToe {
@@ -108,8 +108,8 @@ impl Moves for TicTacToe {
     }
 }
 
-impl PerformWithClone for TicTacToe {
-    fn perform(&mut self, m: &Self::Move) {
+impl PlayClone for TicTacToe {
+    fn play(&mut self, m: &Self::Move) {
         self.place_unchecked(*m);
     }
 }

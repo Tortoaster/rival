@@ -4,12 +4,13 @@ use crate::{Evaluate, Moves, Play, Value};
 pub struct MaxN;
 
 impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
-    fn search(
+    unsafe fn search(
         &mut self,
-        game: &mut G,
+        game_ptr: *mut G,
         depth: u8,
         scores: &mut [Value; N],
     ) -> SearchResult<G::Move, N> {
+        let game = unsafe { &mut *game_ptr };
         if (depth == 0 && game.quiet()) || game.moves().next().is_none() {
             SearchResult {
                 depth: 0,
@@ -20,9 +21,13 @@ impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
             let mut best = SearchResult::WORST;
 
             for m in game.moves() {
-                let remember = game.play(&m);
-                let current = self.search(game, depth - 1, scores);
-                game.unplay(remember);
+                let current = {
+                    let game = unsafe { &mut *game_ptr };
+                    let remember = game.play(&m);
+                    let current = self.search(game, depth - 1, scores);
+                    game.unplay(remember);
+                    current
+                };
 
                 let turn = game.turn();
                 if current.value[turn] > best.value[turn] {
