@@ -10,7 +10,7 @@ pub trait Evaluate<const N: usize> {
     }
 }
 
-pub trait SimpleEvaluate {
+pub trait EvaluateTwoPlayers {
     fn second_players_turn(&self) -> bool;
 
     fn evaluate(&self) -> Value;
@@ -20,7 +20,7 @@ pub trait SimpleEvaluate {
     }
 }
 
-impl<G: SimpleEvaluate> Evaluate<2> for G {
+impl<G: EvaluateTwoPlayers> Evaluate<2> for G {
     fn turn(&self) -> usize {
         self.second_players_turn() as usize
     }

@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use rival::{Evaluate, Moves, SimplePerform, Value};
+use rival::{Evaluate, Moves, PerformWithClone, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToe {
@@ -108,7 +108,7 @@ impl Moves for TicTacToe {
     }
 }
 
-impl SimplePerform for TicTacToe {
+impl PerformWithClone for TicTacToe {
     fn perform(&mut self, m: &Self::Move) {
         self.place_unchecked(*m);
     }
@@ -118,7 +118,7 @@ impl SimplePerform for TicTacToe {
 mod tests {
     extern crate test;
 
-    use rival::{Evaluate, Moves, Perform, SearchExt};
+    use rival::{Evaluate, Moves, Play, SearchExt};
     use test::Bencher;
 
     use crate::TicTacToe;
@@ -129,7 +129,7 @@ mod tests {
 
         for _ in 0..9 {
             let m = game.best_move(6).unwrap();
-            game.perform(&m);
+            game.play(&m);
         }
 
         assert_eq!(game.moves().len(), 0);
@@ -143,7 +143,7 @@ mod tests {
 
             for _ in 0..9 {
                 let m = game.best_move(6).unwrap();
-                game.perform(&m);
+                game.play(&m);
             }
         });
     }
