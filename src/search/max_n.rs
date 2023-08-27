@@ -1,11 +1,13 @@
-use crate::search::{SearchResult, Strategy};
-use crate::{Evaluate, Moves, Play, Value};
+use crate::{
+    search::{SearchResult, Strategy},
+    Evaluate, Moves, Play, Value,
+};
 
 pub struct MaxN;
 
 impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
     unsafe fn search(
-        &mut self,
+        &self,
         game_ptr: *mut G,
         depth: u8,
         scores: &mut [Value; N],

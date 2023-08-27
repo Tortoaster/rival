@@ -1,11 +1,23 @@
-use crate::error::{RivalError, RivalResult};
-use crate::search::Strategy;
-use crate::{Moves, Play, Value};
 use std::marker::PhantomData;
+
+use crate::{
+    error::{RivalError, RivalResult},
+    search::Strategy,
+    Moves, Play, Value,
+};
 
 pub struct Rival<G, S, const N: usize> {
     strategy: S,
     phantom: PhantomData<[G; N]>,
+}
+
+impl<G, S, const N: usize> Rival<G, S, N> {
+    pub fn new(strategy: S) -> Self {
+        Rival {
+            strategy,
+            phantom: PhantomData,
+        }
+    }
 }
 
 impl<G: Moves, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
