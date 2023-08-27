@@ -22,7 +22,7 @@ impl<G, S, const N: usize> Rival<G, S, N> {
 }
 
 impl<G: Moves, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
-    pub fn get_best(&mut self, game: &mut G, depth: u8) -> RivalResult<G::Move> {
+    pub fn get_best(&self, game: &mut G, depth: u8) -> RivalResult<G::Move> {
         unsafe {
             self.strategy
                 .search(game, depth, &mut [Value::MIN; N])
@@ -33,7 +33,7 @@ impl<G: Moves, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
 }
 
 impl<G: Moves + Play, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
-    pub fn play(&mut self, game: &mut G, depth: u8) -> RivalResult<()> {
+    pub fn play(&self, game: &mut G, depth: u8) -> RivalResult<()> {
         let best = self.get_best(game, depth)?;
         game.play(&best);
 
