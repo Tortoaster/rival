@@ -14,7 +14,13 @@ impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
         scores: &mut [Value; N],
     ) -> SearchResult<G::Move, N> {
         let game = unsafe { &mut *game_ptr };
-        if (depth == 0 && game.quiet()) || game.moves().next().is_none() {
+        if game.moves().next().is_none() {
+            SearchResult {
+                depth: u8::MAX,
+                value: game.evaluate(),
+                best: None,
+            }
+        } else if depth == 0 && game.quiet() {
             SearchResult {
                 depth: 0,
                 value: game.evaluate(),

@@ -27,11 +27,7 @@ impl<G: EvaluateTwoPlayers> Evaluate<2> for G {
 
     fn evaluate(&self) -> [Value; 2] {
         let value = self.evaluate();
-        if self.second_players_turn() {
-            [-value, value]
-        } else {
-            [value, -value]
-        }
+        [value, -value]
     }
 
     fn quiet(&self) -> bool {
