@@ -6,6 +6,7 @@ use crate::{
     Moves, Play, Value,
 };
 
+#[derive(Copy, Clone, Debug)]
 pub struct Rival<G, S, const N: usize> {
     strategy: S,
     phantom: PhantomData<[G; N]>,

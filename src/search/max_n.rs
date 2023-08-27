@@ -3,6 +3,7 @@ use crate::{
     Evaluate, Moves, Play, Value,
 };
 
+#[derive(Copy, Clone, Debug)]
 pub struct MaxN;
 
 impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
