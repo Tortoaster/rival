@@ -6,39 +6,35 @@ use crate::{
 #[derive(Copy, Clone, Debug)]
 pub struct MaxN;
 
-impl<G: Evaluate<N> + Play + Moves, const N: usize> Strategy<G, N> for MaxN {
-    unsafe fn search(
-        &self,
-        game_ptr: *mut G,
-        depth: u8,
-        scores: &mut [Value; N],
-    ) -> SearchResult<G::Move, N> {
-        let game = unsafe { &mut *game_ptr };
-        if game.moves().next().is_none() {
+impl<S: Evaluate<N> + Play + Moves, const N: usize> Strategy<S, N> for MaxN {
+    type Value = [Value; N];
+
+    fn search(state: &mut S, depth: u8) -> SearchResult<Self::Value, S::Move> {
+        if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
-                value: game.evaluate(),
+                value: state.evaluate(),
                 best: None,
             }
-        } else if depth == 0 && game.quiet() {
+        } else if depth == 0 && state.quiet() {
             SearchResult {
                 depth: 0,
-                value: game.evaluate(),
+                value: state.evaluate(),
                 best: None,
             }
         } else {
-            let mut best = SearchResult::WORST;
+            let mut best = SearchResult::<Self::Value, S::Move>::MIN;
 
-            for m in game.moves() {
-                let current = {
-                    let game = unsafe { &mut *game_ptr };
-                    let remember = game.play(&m);
-                    let current = self.search(game, depth - 1, scores);
-                    game.unplay(remember);
-                    current
-                };
+            let state_ptr: *mut S = state;
+            for m in state.moves() {
+                // Safety: as long as unplay properly restores any existing references that play
+                // destroys, this should be safe, right?
+                let next_state = unsafe { &mut *state_ptr };
+                let remember = next_state.play(&m);
+                let current = Self::search(next_state, depth - 1);
+                next_state.unplay(remember);
 
-                let turn = game.turn();
+                let turn = state.turn();
                 if current.value[turn] > best.value[turn] {
                     best = SearchResult {
                         depth: current.depth.saturating_add(1),

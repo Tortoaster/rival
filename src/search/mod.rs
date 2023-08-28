@@ -1,29 +1,53 @@
-use crate::{evaluate::Value, moves::Moves};
-
-mod max_n;
+use std::ops::Neg;
 
 pub use max_n::MaxN;
+pub use negamax::Negamax;
 
-pub trait Strategy<G: Moves, const N: usize> {
-    unsafe fn search(
-        &self,
-        game_ptr: *mut G,
-        depth: u8,
-        scores: &mut [Value; N],
-    ) -> SearchResult<G::Move, N>;
+use crate::{moves::Moves, Value};
+
+mod max_n;
+mod negamax;
+
+pub trait Strategy<S: Moves, const N: usize> {
+    type Value: HasMin;
+
+    fn search(state: &mut S, depth: u8) -> SearchResult<Self::Value, S::Move>;
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct SearchResult<M, const N: usize> {
+pub struct SearchResult<V, M> {
     pub depth: u8,
-    pub value: [Value; N],
+    pub value: V,
     pub best: Option<M>,
 }
 
-impl<M, const N: usize> SearchResult<M, N> {
-    const WORST: SearchResult<M, N> = SearchResult {
+impl<V: HasMin, M> SearchResult<V, M> {
+    const MIN: SearchResult<V, M> = SearchResult {
         depth: 0,
-        value: [Value::MIN; N],
+        value: V::MIN,
         best: None,
     };
+}
+
+impl<V: Neg<Output = V>, M> Neg for SearchResult<V, M> {
+    type Output = Self;
+
+    fn neg(mut self) -> Self::Output {
+        self.value = -self.value;
+        self
+    }
+}
+
+pub trait HasMin {
+    const MIN: Self;
+}
+
+impl HasMin for Value {
+    // Plus one to prevent overflow when negating
+    const MIN: Self = Value::MIN + 1;
+}
+
+impl<const N: usize> HasMin for [Value; N] {
+    // Plus one to prevent overflow when negating
+    const MIN: Self = [Value::MIN + 1; N];
 }

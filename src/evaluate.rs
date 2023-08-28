@@ -2,8 +2,8 @@ pub type Value = i16;
 
 /// Describes how the search algorithm should estimate which player is doing
 /// best in the current state of the game. The const generic `N` describes the
-/// number of players. The [`Evaluate2`] trait can be implemented instead for
-/// 2-player games.
+/// number of players. The [`EvaluateZeroSum`] trait can be implemented instead
+/// for 2-player games.
 pub trait Evaluate<const N: usize> {
     /// Indicates whose turn it is. The values returned by [`evaluate`] should
     /// consistently return the score associated with the current player at this
@@ -27,10 +27,13 @@ pub trait Evaluate<const N: usize> {
     }
 }
 
-/// A slightly simpler trait to implement than the more general [`Evaluate`]
-/// trait, but only applicable for 2-player games.
-pub trait Evaluate2 {
-    /// Indicates whether the current playing is trying to minimize the score.
+/// Describes how the search algorithm should estimate which player is doing
+/// better in a two-player zero-sum game, i.e. a game where one player's gain
+/// equals the other player's loss. This trait is a bit simpler to implement
+/// than the more general [`Evaluate`] trait, but not applicable for all types
+/// of games.
+pub trait EvaluateZeroSum {
+    /// Indicates whether the current player is trying to minimize the score.
     /// This should be reflected by [`evaluate`] returning a lower score if this
     /// player is doing well.
     ///
@@ -53,7 +56,7 @@ pub trait Evaluate2 {
     }
 }
 
-impl<G: Evaluate2> Evaluate<2> for G {
+impl<G: EvaluateZeroSum> Evaluate<2> for G {
     fn turn(&self) -> usize {
         self.min_turn() as usize
     }

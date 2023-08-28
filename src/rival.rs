@@ -3,19 +3,17 @@ use std::marker::PhantomData;
 use crate::{
     error::{RivalError, RivalResult},
     search::Strategy,
-    Moves, Play, Value,
+    Moves, Play,
 };
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Rival<G, S, const N: usize> {
-    strategy: S,
-    phantom: PhantomData<[G; N]>,
+    phantom: PhantomData<[(G, S); N]>,
 }
 
 impl<G, S, const N: usize> Rival<G, S, N> {
-    pub fn new(strategy: S) -> Self {
+    pub fn new() -> Self {
         Rival {
-            strategy,
             phantom: PhantomData,
         }
     }
@@ -23,12 +21,7 @@ impl<G, S, const N: usize> Rival<G, S, N> {
 
 impl<G: Moves, S: Strategy<G, N>, const N: usize> Rival<G, S, N> {
     pub fn get_best(&self, game: &mut G, depth: u8) -> RivalResult<G::Move> {
-        unsafe {
-            self.strategy
-                .search(game, depth, &mut [Value::MIN; N])
-                .best
-                .ok_or(RivalError::NoMove)
-        }
+        S::search(game, depth).best.ok_or(RivalError::NoMove)
     }
 }
 

@@ -44,9 +44,10 @@ pub unsafe trait Play: Moves {
 }
 
 /// A safe and simple alternative to the [`Play`] trait. This implementation
-/// simply clones the original state before playing a move, and puts it back to
-/// [`unplay`]. In most cases, this trait is more than adequate, but some games
-/// might gain a performance boost from implementing [`Play`] directly.
+/// simply clones the original state before playing a move, and puts the clone
+/// back in place to [`unplay`]. In most cases, this trait is more than
+/// adequate, but some games might gain a performance boost from implementing
+/// [`Play`] directly.
 ///
 /// [`unplay`]: Play::unplay
 pub trait PlayClone: Moves {

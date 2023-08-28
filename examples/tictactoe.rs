@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use rival::{Evaluate, Moves, PlayClone, Value};
+use rival::{EvaluateZeroSum, Moves, PlayClone, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToe {
@@ -63,21 +63,21 @@ impl TicTacToe {
     }
 }
 
-impl Evaluate<2> for TicTacToe {
-    fn turn(&self) -> usize {
-        self.turn() as usize
+impl EvaluateZeroSum for TicTacToe {
+    fn min_turn(&self) -> bool {
+        self.turn() == 1
     }
 
-    fn evaluate(&self) -> [Value; 2] {
+    fn evaluate(&self) -> Value {
         TicTacToe::TRIPLETS
             .iter()
             .find_map(|triplet| {
                 if self.present & *triplet == *triplet {
                     let symbols = self.symbol & *triplet;
                     if symbols == 0 {
-                        Some([1, -1])
+                        Some(1)
                     } else if symbols == 0xffff & *triplet {
-                        Some([-1, 1])
+                        Some(-1)
                     } else {
                         None
                     }
@@ -85,15 +85,15 @@ impl Evaluate<2> for TicTacToe {
                     None
                 }
             })
-            .unwrap_or([0, 0])
+            .unwrap_or(0)
     }
 }
 
 impl Moves for TicTacToe {
     type Move = u16;
-    type Iter = <Vec<Self::Move> as IntoIterator>::IntoIter;
+    type Iter<'a> = <Vec<Self::Move> as IntoIterator>::IntoIter;
 
-    fn moves(&self) -> Self::Iter {
+    fn moves(&self) -> Self::Iter<'static> {
         let mut turns = Vec::new();
         let valid = self.valid_moves();
 
@@ -118,32 +118,77 @@ impl PlayClone for TicTacToe {
 mod tests {
     extern crate test;
 
-    use rival::{Evaluate, Moves, Play, SearchExt};
+    use rival::{Evaluate, MaxN, Moves, Negamax, Rival};
     use test::Bencher;
 
     use crate::TicTacToe;
 
     #[test]
-    fn test_tictactoe() {
+    fn test_tictactoe_maxn() {
         let mut game = TicTacToe::new();
+        let rival: Rival<_, MaxN, 2> = Rival::new();
 
         for _ in 0..9 {
-            let m = game.best_move(6).unwrap();
-            game.play(&m);
+            rival.play(&mut game, 9).unwrap();
         }
 
         assert_eq!(game.moves().len(), 0);
         assert_eq!(game.evaluate(), [0, 0]);
     }
 
+    #[test]
+    fn test_tictactoe_negamax() {
+        let mut game = TicTacToe::new();
+        let rival: Rival<_, Negamax, 2> = Rival::new();
+
+        for _ in 0..9 {
+            rival.play(&mut game, 9).unwrap();
+        }
+
+        assert_eq!(game.moves().len(), 0);
+        assert_eq!(game.evaluate(), [0, 0]);
+    }
+
+    #[test]
+    fn test_tictactoe_maxn_vs_negamax() {
+        // The game results in a tie if both players play optimally, which will make
+        // other tests pass. However, if both players actively evade winning, the game
+        // will also result in a tie. This test makes sure `Negamax` doesn't do that, as
+        // `MaxN` was manually verified to be working properly.
+        let mut game = TicTacToe::new();
+        let a: Rival<_, Negamax, 2> = Rival::new();
+        let b: Rival<_, MaxN, 2> = Rival::new();
+
+        for _ in 0..4 {
+            a.play(&mut game, 9).unwrap();
+            b.play(&mut game, 9).unwrap();
+        }
+        a.play(&mut game, 9).unwrap();
+
+        assert_eq!(game.moves().len(), 0);
+        assert_eq!(game.evaluate(), [0, 0]);
+    }
+
     #[bench]
-    fn bench_tictactoe(bencher: &mut Bencher) {
+    fn bench_tictactoe_maxn(bencher: &mut Bencher) {
         bencher.iter(|| {
             let mut game = TicTacToe::new();
+            let rival: Rival<_, MaxN, 2> = Rival::new();
 
             for _ in 0..9 {
-                let m = game.best_move(6).unwrap();
-                game.play(&m);
+                rival.play(&mut game, 9).unwrap();
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_tictactoe_negamax(bencher: &mut Bencher) {
+        bencher.iter(|| {
+            let mut game = TicTacToe::new();
+            let rival: Rival<_, Negamax, 2> = Rival::new();
+
+            for _ in 0..9 {
+                rival.play(&mut game, 9).unwrap();
             }
         });
     }
