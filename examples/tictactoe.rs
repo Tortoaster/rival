@@ -126,7 +126,7 @@ mod tests {
     #[test]
     fn test_tictactoe_maxn() {
         let mut game = TicTacToe::new();
-        let rival: Rival<_, MaxN, 2> = Rival::new();
+        let mut rival: Rival<_, MaxN, 2> = Rival::new();
 
         for _ in 0..9 {
             rival.play(&mut game, 9).unwrap();
@@ -139,7 +139,7 @@ mod tests {
     #[test]
     fn test_tictactoe_negamax() {
         let mut game = TicTacToe::new();
-        let rival: Rival<_, Negamax, 2> = Rival::new();
+        let mut rival: Rival<_, Negamax, 2> = Rival::new();
 
         for _ in 0..9 {
             rival.play(&mut game, 9).unwrap();
@@ -156,8 +156,8 @@ mod tests {
         // will also result in a tie. This test makes sure `Negamax` doesn't do that, as
         // `MaxN` was manually verified to be working properly.
         let mut game = TicTacToe::new();
-        let a: Rival<_, Negamax, 2> = Rival::new();
-        let b: Rival<_, MaxN, 2> = Rival::new();
+        let mut a: Rival<_, Negamax, 2> = Rival::new();
+        let mut b: Rival<_, MaxN, 2> = Rival::new();
 
         for _ in 0..4 {
             a.play(&mut game, 9).unwrap();
@@ -173,7 +173,7 @@ mod tests {
     fn bench_tictactoe_maxn(bencher: &mut Bencher) {
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let rival: Rival<_, MaxN, 2> = Rival::new();
+            let mut rival: Rival<_, MaxN, 2> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();
@@ -185,7 +185,7 @@ mod tests {
     fn bench_tictactoe_negamax(bencher: &mut Bencher) {
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let rival: Rival<_, Negamax, 2> = Rival::new();
+            let mut rival: Rival<_, Negamax, 2> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();

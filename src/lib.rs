@@ -1,3 +1,4 @@
+mod cache;
 mod error;
 mod evaluate;
 mod moves;

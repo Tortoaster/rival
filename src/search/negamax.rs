@@ -1,15 +1,32 @@
-use crate::{search::SearchResult, Evaluate, Moves, Play, Strategy, Value};
+use std::hash::Hash;
+
+use crate::{
+    cache::TranspositionTable, search::SearchResult, Evaluate, Moves, Play, Strategy, Value,
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Negamax;
 
 impl Negamax {
-    fn search_alpha_beta<S: Evaluate<2> + Play + Moves>(
+    fn search_alpha_beta<S: Evaluate<2> + Play + Moves + Hash>(
         state: &mut S,
         depth: u8,
         mut alpha: Value,
         beta: Value,
-    ) -> SearchResult<<Negamax as Strategy<S, 2>>::Value, S::Move> {
+        cache: &mut TranspositionTable<
+            S,
+            SearchResult<<Negamax as Strategy<S, 2>>::Value, S::Move>,
+        >,
+    ) -> SearchResult<<Negamax as Strategy<S, 2>>::Value, S::Move>
+    where
+        S::Move: Copy,
+    {
+        if let Some(result) = cache.get(state) {
+            if result.depth >= depth {
+                return *result;
+            }
+        }
+
         if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
@@ -33,9 +50,9 @@ impl Negamax {
                 let turn = state.turn();
                 let remember = next_state.play(&m);
                 let current = if turn == next_state.turn() {
-                    Self::search_alpha_beta(next_state, depth - 1, alpha, beta)
+                    Self::search_alpha_beta(next_state, depth - 1, alpha, beta, cache)
                 } else {
-                    -Self::search_alpha_beta(next_state, depth - 1, -beta, -alpha)
+                    -Self::search_alpha_beta(next_state, depth - 1, -beta, -alpha, cache)
                 };
                 next_state.unplay(remember);
 
@@ -58,13 +75,20 @@ impl Negamax {
     }
 }
 
-impl<S: Evaluate<2> + Play + Moves> Strategy<S, 2> for Negamax {
+impl<S: Evaluate<2> + Play + Moves + Hash> Strategy<S, 2> for Negamax
+where
+    S::Move: Copy,
+{
     type Value = Value;
 
-    fn search(state: &mut S, depth: u8) -> SearchResult<Self::Value, S::Move> {
+    fn search(
+        state: &mut S,
+        depth: u8,
+        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>>,
+    ) -> SearchResult<Self::Value, S::Move> {
         let alpha = Value::MIN + 1;
         let beta = Value::MAX;
 
-        Self::search_alpha_beta(state, depth, alpha, beta)
+        Self::search_alpha_beta(state, depth, alpha, beta, cache)
     }
 }

@@ -1,4 +1,5 @@
 use crate::{
+    cache::{TranspositionTable, ZobristHash},
     search::{SearchResult, Strategy},
     Evaluate, Moves, Play, Value,
 };
@@ -6,10 +7,23 @@ use crate::{
 #[derive(Copy, Clone, Debug)]
 pub struct MaxN;
 
-impl<S: Evaluate<N> + Play + Moves, const N: usize> Strategy<S, N> for MaxN {
+impl<S: Evaluate<N> + Play + Moves + ZobristHash, const N: usize> Strategy<S, N> for MaxN
+where
+    S::Move: Copy,
+{
     type Value = [Value; N];
 
-    fn search(state: &mut S, depth: u8) -> SearchResult<Self::Value, S::Move> {
+    fn search(
+        state: &mut S,
+        depth: u8,
+        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>>,
+    ) -> SearchResult<Self::Value, S::Move> {
+        if let Some(result) = cache.get(state) {
+            if result.depth >= depth {
+                return *result;
+            }
+        }
+
         if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
@@ -31,7 +45,7 @@ impl<S: Evaluate<N> + Play + Moves, const N: usize> Strategy<S, N> for MaxN {
                 // destroys, this should be safe, right?
                 let next_state = unsafe { &mut *state_ptr };
                 let remember = next_state.play(&m);
-                let current = Self::search(next_state, depth - 1);
+                let current = Self::search(next_state, depth - 1, cache);
                 next_state.unplay(remember);
 
                 let turn = state.turn();

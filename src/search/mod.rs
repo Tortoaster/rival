@@ -3,7 +3,7 @@ use std::ops::Neg;
 pub use max_n::MaxN;
 pub use negamax::Negamax;
 
-use crate::{moves::Moves, Value};
+use crate::{cache::TranspositionTable, moves::Moves, Value};
 
 mod max_n;
 mod negamax;
@@ -11,7 +11,11 @@ mod negamax;
 pub trait Strategy<S: Moves, const N: usize> {
     type Value: HasMin;
 
-    fn search(state: &mut S, depth: u8) -> SearchResult<Self::Value, S::Move>;
+    fn search(
+        state: &mut S,
+        depth: u8,
+        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>>,
+    ) -> SearchResult<Self::Value, S::Move>;
 }
 
 #[derive(Copy, Clone, Debug)]
