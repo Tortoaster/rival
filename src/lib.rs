@@ -6,8 +6,8 @@ mod rival;
 mod search;
 
 pub use error::{RivalError, RivalResult};
-pub use evaluate::{Evaluate, EvaluateTwoPlayers, Value};
+pub use evaluate::{Evaluate, Evaluate2, Value};
 pub use moves::Moves;
-pub use play::{PlayClone, Play};
+pub use play::{Play, PlayClone};
 pub use rival::Rival;
-pub use search::{SearchResult, Strategy, MaxN};
+pub use search::{MaxN, SearchResult, Strategy};
