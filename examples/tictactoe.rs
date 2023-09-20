@@ -1,6 +1,6 @@
 #![feature(test)]
 
-use rival::{EvaluateZeroSum, Moves, PlayClone, Value};
+use rival::{EvaluateZeroSum, LazyZobristHash, Moves, PlayClone, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TicTacToe {
@@ -114,6 +114,8 @@ impl PlayClone for TicTacToe {
     }
 }
 
+impl LazyZobristHash for TicTacToe {}
+
 #[cfg(test)]
 mod tests {
     extern crate test;
@@ -123,10 +125,13 @@ mod tests {
 
     use crate::TicTacToe;
 
+    /// Capacity of the transposition table of computer players in these tests.
+    const CAP: usize = 100;
+
     #[test]
     fn test_tictactoe_maxn() {
         let mut game = TicTacToe::new();
-        let mut rival: Rival<_, MaxN, 2> = Rival::new();
+        let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
 
         for _ in 0..9 {
             rival.play(&mut game, 9).unwrap();
@@ -139,7 +144,7 @@ mod tests {
     #[test]
     fn test_tictactoe_negamax() {
         let mut game = TicTacToe::new();
-        let mut rival: Rival<_, Negamax, 2> = Rival::new();
+        let mut rival: Rival<_, Negamax, 2, CAP> = Rival::new();
 
         for _ in 0..9 {
             rival.play(&mut game, 9).unwrap();
@@ -156,8 +161,8 @@ mod tests {
         // will also result in a tie. This test makes sure `Negamax` doesn't do that, as
         // `MaxN` was manually verified to be working properly.
         let mut game = TicTacToe::new();
-        let mut a: Rival<_, Negamax, 2> = Rival::new();
-        let mut b: Rival<_, MaxN, 2> = Rival::new();
+        let mut a: Rival<_, Negamax, 2, CAP> = Rival::new();
+        let mut b: Rival<_, MaxN, 2, CAP> = Rival::new();
 
         for _ in 0..4 {
             a.play(&mut game, 9).unwrap();
@@ -173,7 +178,7 @@ mod tests {
     fn bench_tictactoe_maxn(bencher: &mut Bencher) {
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let mut rival: Rival<_, MaxN, 2> = Rival::new();
+            let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();
@@ -185,7 +190,7 @@ mod tests {
     fn bench_tictactoe_negamax(bencher: &mut Bencher) {
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let mut rival: Rival<_, Negamax, 2> = Rival::new();
+            let mut rival: Rival<_, Negamax, 2, CAP> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();

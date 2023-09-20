@@ -1,23 +1,24 @@
-use std::hash::Hash;
-
 use crate::{
-    cache::TranspositionTable, search::SearchResult, Evaluate, Moves, Play, Strategy, Value,
+    cache::{TranspositionTable, ZobristHash},
+    search::SearchResult,
+    Evaluate, Moves, Play, Strategy, Value,
 };
 
 #[derive(Copy, Clone, Debug)]
 pub struct Negamax;
 
 impl Negamax {
-    fn search_alpha_beta<S: Evaluate<2> + Play + Moves + Hash>(
+    fn search_alpha_beta<S: Evaluate<2> + Play + Moves + ZobristHash, const CAP: usize>(
         state: &mut S,
         depth: u8,
         mut alpha: Value,
         beta: Value,
         cache: &mut TranspositionTable<
             S,
-            SearchResult<<Negamax as Strategy<S, 2>>::Value, S::Move>,
+            SearchResult<<Negamax as Strategy<S, 2, CAP>>::Value, S::Move>,
+            CAP,
         >,
-    ) -> SearchResult<<Negamax as Strategy<S, 2>>::Value, S::Move>
+    ) -> SearchResult<<Negamax as Strategy<S, 2, CAP>>::Value, S::Move>
     where
         S::Move: Copy,
     {
@@ -75,7 +76,7 @@ impl Negamax {
     }
 }
 
-impl<S: Evaluate<2> + Play + Moves + Hash> Strategy<S, 2> for Negamax
+impl<S: Evaluate<2> + Play + Moves + ZobristHash, const CAP: usize> Strategy<S, 2, CAP> for Negamax
 where
     S::Move: Copy,
 {
@@ -84,7 +85,7 @@ where
     fn search(
         state: &mut S,
         depth: u8,
-        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>>,
+        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>, CAP>,
     ) -> SearchResult<Self::Value, S::Move> {
         let alpha = Value::MIN + 1;
         let beta = Value::MAX;

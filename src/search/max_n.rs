@@ -7,16 +7,18 @@ use crate::{
 #[derive(Copy, Clone, Debug)]
 pub struct MaxN;
 
-impl<S: Evaluate<N> + Play + Moves + ZobristHash, const N: usize> Strategy<S, N> for MaxN
+impl<S: Evaluate<N> + Play + Moves + ZobristHash, const N: usize, const CAP: usize>
+    Strategy<S, N, CAP> for MaxN
 where
     S::Move: Copy,
 {
     type Value = [Value; N];
 
+    // TODO: Implement pruning
     fn search(
         state: &mut S,
         depth: u8,
-        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>>,
+        cache: &mut TranspositionTable<S, SearchResult<Self::Value, S::Move>, CAP>,
     ) -> SearchResult<Self::Value, S::Move> {
         if let Some(result) = cache.get(state) {
             if result.depth >= depth {
