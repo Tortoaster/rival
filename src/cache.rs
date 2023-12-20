@@ -44,6 +44,7 @@ pub trait ZobristHash {
 pub trait LazyZobristHash: Hash {}
 
 impl<T: LazyZobristHash> ZobristHash for T {
+    #[inline]
     fn zobrist_hash(&self) -> usize {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);

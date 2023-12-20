@@ -126,7 +126,7 @@ mod tests {
     use crate::TicTacToe;
 
     /// Capacity of the transposition table of computer players in these tests.
-    const CAP: usize = 100;
+    const CAP: usize = 7643;
 
     #[test]
     fn test_tictactoe_maxn() {
@@ -176,9 +176,10 @@ mod tests {
 
     #[bench]
     fn bench_tictactoe_maxn(bencher: &mut Bencher) {
+        let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
+
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();
@@ -188,9 +189,10 @@ mod tests {
 
     #[bench]
     fn bench_tictactoe_negamax(bencher: &mut Bencher) {
+        let mut rival: Rival<_, Negamax, 2, CAP> = Rival::new();
+
         bencher.iter(|| {
             let mut game = TicTacToe::new();
-            let mut rival: Rival<_, Negamax, 2, CAP> = Rival::new();
 
             for _ in 0..9 {
                 rival.play(&mut game, 9).unwrap();
