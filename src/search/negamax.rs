@@ -28,7 +28,7 @@ impl Negamax {
             }
         }
 
-        if state.moves().next().is_none() {
+        let best = if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
                 value: state.evaluate()[state.turn()],
@@ -72,7 +72,11 @@ impl Negamax {
             }
 
             best
-        }
+        };
+
+        cache.insert(state, best);
+
+        best
     }
 }
 

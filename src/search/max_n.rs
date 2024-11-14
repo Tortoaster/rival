@@ -26,7 +26,7 @@ where
             }
         }
 
-        if state.moves().next().is_none() {
+        let best = if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
                 value: state.evaluate(),
@@ -61,6 +61,10 @@ where
             }
 
             best
-        }
+        };
+
+        cache.insert(state, best);
+
+        best
     }
 }
