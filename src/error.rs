@@ -1,9 +1,11 @@
-use std::error::Error;
-use std::fmt::{Display, Formatter};
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
 
 pub type RivalResult<T, E = RivalError> = Result<T, E>;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum RivalError {
     NoMove,
 }

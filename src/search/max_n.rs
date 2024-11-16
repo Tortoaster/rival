@@ -41,6 +41,7 @@ where
         } else {
             let mut best = SearchResult::<Self::Value, S::Move>::MIN;
 
+            let turn = state.turn();
             let state_ptr: *mut S = state;
             for m in state.moves() {
                 // Safety: as long as unplay properly restores any existing references that play
@@ -50,7 +51,6 @@ where
                 let current = Self::search(next_state, depth - 1, cache);
                 next_state.unplay(remember);
 
-                let turn = state.turn();
                 if current.value[turn] > best.value[turn] {
                     best = SearchResult {
                         depth: current.depth.saturating_add(1),

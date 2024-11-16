@@ -1,14 +1,14 @@
 use crate::{
     cache::{TranspositionTable, ZobristHash},
     search::SearchResult,
-    Evaluate, Moves, Play, Strategy, Value,
+    Evaluate, EvaluateZeroSum, Moves, Play, Strategy, Value,
 };
 
 #[derive(Copy, Clone, Debug)]
 pub struct Negamax;
 
 impl Negamax {
-    fn search_alpha_beta<S: Evaluate<2> + Play + Moves + ZobristHash, const CAP: usize>(
+    fn search_alpha_beta<S: EvaluateZeroSum + Play + Moves + ZobristHash, const CAP: usize>(
         state: &mut S,
         depth: u8,
         mut alpha: Value,
@@ -31,13 +31,21 @@ impl Negamax {
         let best = if state.moves().next().is_none() {
             SearchResult {
                 depth: u8::MAX,
-                value: state.evaluate()[state.turn()],
+                value: if state.min_turn() {
+                    -state.evaluate()
+                } else {
+                    state.evaluate()
+                },
                 best: None,
             }
         } else if depth == 0 && state.quiet() {
             SearchResult {
                 depth: 0,
-                value: state.evaluate()[state.turn()],
+                value: if state.min_turn() {
+                    -state.evaluate()
+                } else {
+                    state.evaluate()
+                },
                 best: None,
             }
         } else {
@@ -80,7 +88,8 @@ impl Negamax {
     }
 }
 
-impl<S: Evaluate<2> + Play + Moves + ZobristHash, const CAP: usize> Strategy<S, 2, CAP> for Negamax
+impl<S: EvaluateZeroSum + Play + Moves + ZobristHash, const CAP: usize> Strategy<S, 2, CAP>
+    for Negamax
 where
     S::Move: Copy,
 {
