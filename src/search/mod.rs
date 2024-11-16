@@ -1,14 +1,17 @@
 use std::ops::Neg;
 
-pub use max_n::MaxN;
 pub use negamax::Negamax;
 
-use crate::{cache::TranspositionTable, moves::Moves, Value};
+use crate::{
+    cache::{CacheKey, TranspositionTable},
+    moves::Moves,
+    Value,
+};
 
 mod max_n;
 mod negamax;
 
-pub trait Strategy<S: Moves, const N: usize, const CAP: usize> {
+pub trait Strategy<S: Moves + CacheKey, const N: usize, const CAP: usize> {
     type Value: HasMin;
 
     fn search(

@@ -1,22 +1,30 @@
 use std::{
+    fmt::Debug,
     marker::PhantomData,
     time::{Duration, Instant},
 };
 
 use crate::{
-    cache::TranspositionTable,
+    cache::{CacheKey, TranspositionTable},
     error::{RivalError, RivalResult},
     search::Strategy,
     Moves, Play, SearchResult,
 };
 
 #[derive(Debug, Default)]
-pub struct Rival<G: Moves, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize> {
+pub struct Rival<G: Moves + CacheKey, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize>
+where
+    G::Key: Debug,
+{
     phantom: PhantomData<[(G, S); N]>,
     cache: TranspositionTable<G, SearchResult<S::Value, G::Move>, CAP>,
 }
 
-impl<G: Moves, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize> Rival<G, S, N, CAP> {
+impl<G: Moves + CacheKey, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize>
+    Rival<G, S, N, CAP>
+where
+    G::Key: Debug,
+{
     pub fn new() -> Self {
         Rival {
             phantom: PhantomData,
@@ -45,8 +53,10 @@ impl<G: Moves, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize> Rival<G
     }
 }
 
-impl<G: Moves + Play, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize>
+impl<G: Moves + Play + CacheKey, S: Strategy<G, N, CAP>, const N: usize, const CAP: usize>
     Rival<G, S, N, CAP>
+where
+    G::Key: Debug,
 {
     pub fn play(&mut self, game: &mut G, depth: u8) -> RivalResult<()> {
         let best = self.get_best(game, depth)?;

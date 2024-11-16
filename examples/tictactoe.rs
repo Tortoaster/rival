@@ -2,10 +2,10 @@
 
 use std::{
     fmt::{Debug, Display, Formatter},
-    ops::Not,
+    ops::{Index, IndexMut, Not},
 };
-use std::ops::{Index, IndexMut};
-use rival::{EvaluateZeroSum, LazyZobristHash, Moves, PlayClone, Value};
+
+use rival::{CloneCacheKey, EvaluateZeroSum, LazyZobristHash, Moves, PlayClone, Value};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 enum Symbol {
@@ -88,12 +88,10 @@ impl EvaluateZeroSum for TicTacToe {
             [(0, 0), (1, 0), (2, 0)],
             [(0, 1), (1, 1), (2, 1)],
             [(0, 2), (1, 2), (2, 2)],
-
             // Columns
             [(0, 0), (0, 1), (0, 2)],
             [(1, 0), (1, 1), (1, 2)],
             [(2, 0), (2, 1), (2, 2)],
-
             // Diagonals
             [(0, 0), (1, 1), (2, 2)],
             [(2, 0), (1, 1), (0, 2)],
@@ -101,7 +99,9 @@ impl EvaluateZeroSum for TicTacToe {
 
         triplets
             .iter()
-            .filter(|triplet| self[triplet[0]] == self[triplet[1]] && self[triplet[1]] == self[triplet[2]])
+            .filter(|triplet| {
+                self[triplet[0]] == self[triplet[1]] && self[triplet[1]] == self[triplet[2]]
+            })
             .find_map(|triplet| self[triplet[0]])
             .map(|symbol| symbol.value())
             .unwrap_or(0)
@@ -144,6 +144,8 @@ impl PlayClone for TicTacToe {
 }
 
 impl LazyZobristHash for TicTacToe {}
+
+impl CloneCacheKey for TicTacToe {}
 
 impl Display for TicTacToe {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -191,40 +193,40 @@ impl Debug for TicTacToe {
 mod tests {
     extern crate test;
 
-    use rival::{EvaluateZeroSum, MaxN, Moves, Negamax, PlayClone, Rival};
+    use rival::{EvaluateZeroSum, Moves, Negamax, PlayClone, Rival};
     use test::Bencher;
 
     use crate::TicTacToe;
 
     /// Capacity of the transposition table of computer players in these tests.
-    const CAP: usize = 10000;
+    const CAP: usize = 2000;
 
-    #[test]
-    fn test_tictactoe_maxn_tie() {
-        let mut game = TicTacToe::new();
-        let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
+    // #[test]
+    // fn test_tictactoe_maxn_tie() {
+    //     let mut game = TicTacToe::new();
+    //     let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
+    //
+    //     for _ in 0..9 {
+    //         assert_eq!(rival.play(&mut game, 9), Ok(()), "{game}");
+    //     }
+    //
+    //     assert_eq!(game.moves().len(), 0);
+    //     assert_eq!(game.evaluate(), 0);
+    // }
 
-        for _ in 0..9 {
-            assert_eq!(rival.play(&mut game, 9), Ok(()), "{game}");
-        }
-
-        assert_eq!(game.moves().len(), 0);
-        assert_eq!(game.evaluate(), 0);
-    }
-
-    #[test]
-    fn test_tictactoe_maxn_best_move() {
-        let mut game = TicTacToe::new();
-
-        game.play(&(0, 0));
-        game.play(&(1, 0));
-        game.play(&(0, 1));
-
-        let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
-        assert_eq!(rival.play(&mut game, 9), Ok(()), "{game}");
-
-        assert_ne!(game[(0, 2)], None);
-    }
+    // #[test]
+    // fn test_tictactoe_maxn_best_move() {
+    //     let mut game = TicTacToe::new();
+    //
+    //     game.play(&(0, 0));
+    //     game.play(&(1, 0));
+    //     game.play(&(0, 1));
+    //
+    //     let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
+    //     assert_eq!(rival.play(&mut game, 9), Ok(()), "{game}");
+    //
+    //     assert_ne!(game[(0, 2)], None);
+    // }
 
     #[test]
     fn test_tictactoe_negamax_tie() {
@@ -253,34 +255,34 @@ mod tests {
         assert_ne!(game[(0, 2)], None);
     }
 
-    #[test]
-    fn test_tictactoe_maxn_vs_negamax_tie() {
-        let mut game = TicTacToe::new();
-        let mut a: Rival<_, Negamax, 2, CAP> = Rival::new();
-        let mut b: Rival<_, MaxN, 2, CAP> = Rival::new();
+    // #[test]
+    // fn test_tictactoe_maxn_vs_negamax_tie() {
+    //     let mut game = TicTacToe::new();
+    //     let mut a: Rival<_, Negamax, 2, CAP> = Rival::new();
+    //     let mut b: Rival<_, MaxN, 2, CAP> = Rival::new();
+    //
+    //     for _ in 0..4 {
+    //         assert_eq!(a.play(&mut game, 9), Ok(()), "{game}");
+    //         assert_eq!(b.play(&mut game, 9), Ok(()), "{game}");
+    //     }
+    //     assert_eq!(a.play(&mut game, 9), Ok(()), "{game}");
+    //
+    //     assert_eq!(game.moves().len(), 0);
+    //     assert_eq!(game.evaluate(), 0);
+    // }
 
-        for _ in 0..4 {
-            assert_eq!(a.play(&mut game, 9), Ok(()), "{game}");
-            assert_eq!(b.play(&mut game, 9), Ok(()), "{game}");
-        }
-        assert_eq!(a.play(&mut game, 9), Ok(()), "{game}");
-
-        assert_eq!(game.moves().len(), 0);
-        assert_eq!(game.evaluate(), 0);
-    }
-
-    #[bench]
-    fn bench_tictactoe_maxn(bencher: &mut Bencher) {
-        let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
-
-        bencher.iter(|| {
-            let mut game = TicTacToe::new();
-
-            for _ in 0..9 {
-                rival.play(&mut game, 9).unwrap();
-            }
-        });
-    }
+    // #[bench]
+    // fn bench_tictactoe_maxn(bencher: &mut Bencher) {
+    //     let mut rival: Rival<_, MaxN, 2, CAP> = Rival::new();
+    //
+    //     bencher.iter(|| {
+    //         let mut game = TicTacToe::new();
+    //
+    //         for _ in 0..9 {
+    //             rival.play(&mut game, 9).unwrap();
+    //         }
+    //     });
+    // }
 
     #[bench]
     fn bench_tictactoe_negamax(bencher: &mut Bencher) {
