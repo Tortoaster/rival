@@ -1,6 +1,6 @@
 # Rival
 
-A framework for creating computer players for turn-based games.
+A library that simplifies creating computer players for turn-based games. See [Beegone](https://github.com/Tortoaster/beegone) for an example use-case.
 
 ## License
 
